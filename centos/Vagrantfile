@@ -1,0 +1,17 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "centos/7"
+
+  config.vm.provision "shell", inline: <<-SHELL
+    yum install -y epel-release && yum update -y
+    yum install -y $(< /vagrant/packages)
+    yum clean
+    Rscript -e 'install.packages("Rcpp",    repos="https://cran.r-project.org")'
+    Rscript -e 'install.packages("RInside", repos="https://cran.r-project.org")'
+    localedef -i en_US -f UTF-8 en_US.UTF-8
+  SHELL
+
+end
