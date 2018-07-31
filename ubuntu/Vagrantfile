@@ -2,17 +2,24 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.hostname = "root-ubuntu"
 
-  config.vm.box = "ubuntu/xenial64"
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = 8192
+  end
+
+  config.ssh.insert_key = true
+  config.ssh.forward_agent = true
+  config.ssh.forward_x11 = true
 
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update -qq
+    ln -sf /usr/share/zoneinfo/UTC /etc/localtime
     apt-get install -y $(< /vagrant/packages)
     apt-get clean && apt-get autoclean
-    Rscript -e 'install.packages("Rcpp",    repos="https://cran.r-project.org")'
-    Rscript -e 'install.packages("RInside", repos="https://cran.r-project.org")'
-    rm -rf /var/lib/apt/lists/*
     localedef -i en_US -f UTF-8 en_US.UTF-8
+    /vagrant/build.sh
+    rm -rf /var/lib/apt/lists/*
   SHELL
-
 end
